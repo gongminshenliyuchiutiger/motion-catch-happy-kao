@@ -197,10 +197,11 @@
         <div class="panel" id="start-panel">
             <h1>體感幫高調遊戲系統</h1>
             <p style="text-align: left; display: inline-block;">
-                接住圖片幫高調：<br>
-                <span class="highlight">💰 高調</span> (普通)<br>
-                <span class="highlight-2">💎 真高調</span> (高級)<br>
-                <span class="highlight-3">🔥 超高調</span> (超稀有)<br>
+                <span style="color:red; font-weight:bold;">⚠️ 注意注意！老高愛的迫降，準備接招！</span><br><br>
+                接住老高幫高調：<br>
+                <span class="highlight">💰 （帥老高）高調</span> (普通)<br>
+                <span class="highlight-2">💎 （太陽老高）真高調</span> (高級)<br>
+                <span class="highlight-3">🔥 （北極熊老高）超高調</span> (超稀有)<br>
                 <br>
                 避開炸彈 <span class="danger-text">💣</span> / 愛心 <span class="heal-text">💖</span> 補血
             </p>
@@ -321,8 +322,13 @@
 
         const sfx = new SoundManager();
 
+        // 調整難度設定：密集、快速
         const CFG = {
-            cw: 64, thresh: 25, spawnRate: 40, gravity: 4, hitRadius: 40 
+            cw: 64, 
+            thresh: 25, 
+            spawnRate: 12, // 初始生成間隔縮短 (原本40) -> 掉更多
+            gravity: 6,    // 初始速度加快 (原本4) -> 掉更快
+            hitRadius: 40 
         };
 
         // --- 掉落物類別 ---
@@ -480,6 +486,10 @@
             items = [];
             particles = [];
             floatingTexts = [];
+            
+            // 重置 CFG 到初始刺激模式
+            CFG.spawnRate = 12;
+            
             updateUI();
             gameActive = true;
             loop();
@@ -547,9 +557,23 @@
             gCtx.clearRect(0, 0, w, h);
 
             frameCount++;
+            
+            // --- 掉落生成邏輯修改 ---
             if (frameCount % CFG.spawnRate === 0) {
                 items.push(new Item());
-                if (frameCount % 500 === 0 && CFG.spawnRate > 10) CFG.spawnRate -= 2;
+                
+                // 30% 機率額外多掉一個 (連擊)
+                if (Math.random() > 0.7) {
+                    items.push(new Item());
+                }
+                
+                // 10% 機率再多掉第三個 (大爆發)
+                if (Math.random() > 0.9) {
+                    items.push(new Item());
+                }
+
+                // 隨時間增加難度，但限制下限避免當機
+                if (frameCount % 400 === 0 && CFG.spawnRate > 6) CFG.spawnRate -= 1;
             }
 
             // 更新並繪製掉落物
